@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 The `README.md` file generally contains important information about a project. Depending how your project is set up, the
 contents of your README might include:
 
@@ -43,3 +44,11 @@ Information about the license the project uses.
 ```
 
 Note: This is just a basic structure, not all README files need to contain all these sections. Customize it to suit your project's needs. Since you mentioned not to wrap the code in a code fence, I've used the ``` character at the start and end of any code blocks.
+=======
+IIT G Netwok Autologin Extension
+=========
+
+It's an extension which would keep you logged in to the IIT G Network all the time so that you don't require to relogin evey 20 mins. 
+
+# All contributions are welcome. 
+>>>>>>> a54e7c9c99a712203e8eb8aa844158bea512cabb
