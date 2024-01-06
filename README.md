@@ -1,12 +1,45 @@
-Autologin
-=========
+The `README.md` file generally contains important information about a project. Depending how your project is set up, the
+contents of your README might include:
 
-IIT Guwahati: captive portal auto login
+- A project title.
+- A description of what the project does.
+- How to install dependencies and get the project running.
+- How to use the project.
+- Any contribution guidelines.
+- Any code examples that are needed to understand the project.
+- Licensing information.
 
-Copyright (C) 2013 Rahul Kadyan
+Here's a basic example:
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+```markdown
+# Project Title
 
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+This is a short description of what the project does.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+## Installation
+
+Provide code blocks and explanations for how to get the project installed.
+
+```sh
+$ npm install projectName
+```
+
+## Usage
+
+Provide examples and/or code blocks for how to use the project.
+
+```sh
+$ projectName --help
+```
+
+## Contributing
+
+Details about how to contribute to the project.
+
+## License
+
+Information about the license the project uses.
+
+```
+
+Note: This is just a basic structure, not all README files need to contain all these sections. Customize it to suit your project's needs. Since you mentioned not to wrap the code in a code fence, I've used the ``` character at the start and end of any code blocks.
