@@ -4,117 +4,9 @@
  It also observes for the changes in state, changes Autologin on off accordingly
  */
 
-const key = "zPL+=kHBbkUOM7$M!N@idDS9xs+ike@h"
-
-
-
-async function encrypt(email, password, securityKey) {
-	const dataToEncrypt = { email, password };
-
-
-	const jsonString = JSON.stringify(dataToEncrypt);
-
-
-	const encoder = new TextEncoder();
-	const dataToEncryptUint8 = encoder.encode(jsonString);
-
-
-	const keyMaterial = await crypto.subtle.importKey(
-		'raw',
-		encoder.encode(securityKey),
-		{ name: 'PBKDF2' },
-		false,
-		['deriveBits', 'deriveKey']
-	);
-
-	const derivedKey = await crypto.subtle.deriveKey(
-		{
-			name: 'PBKDF2',
-			salt: new Uint8Array(16),
-			iterations: 100000,
-			hash: 'SHA-256',
-		},
-		keyMaterial,
-		{ name: 'AES-GCM', length: 256 },
-		true,
-		['encrypt', 'decrypt']
-	);
-
-
-	const iv = crypto.getRandomValues(new Uint8Array(12));
-	const encryptedData = await crypto.subtle.encrypt(
-		{ name: 'AES-GCM', iv: iv },
-		derivedKey,
-		dataToEncryptUint8
-	);
-
-	const encryptedString = Array.from(iv)
-		.concat(Array.from(new Uint8Array(encryptedData)))
-		.map(byte => byte.toString(16).padStart(2, '0'))
-		.join('');
-
-	return encryptedString;
-}
-
-async function decrypt(encryptedString, securityKey) {
-
-	const decoder = new TextDecoder('utf-8');
-	const encryptedData = new Uint8Array(
-		encryptedString.match(/.{1,2}/g).map(byte => parseInt(byte, 16))
-	);
-
-
-	const keyMaterial = await crypto.subtle.importKey(
-		'raw',
-		new TextEncoder().encode(securityKey),
-		{ name: 'PBKDF2' },
-		false,
-		['deriveBits', 'deriveKey']
-	);
-
-	const derivedKey = await crypto.subtle.deriveKey(
-		{
-			name: 'PBKDF2',
-			salt: new Uint8Array(16),
-			iterations: 100000,
-			hash: 'SHA-256',
-		},
-		keyMaterial,
-		{ name: 'AES-GCM', length: 256 },
-		true,
-		['encrypt', 'decrypt']
-	);
-
-
-	const iv = encryptedData.slice(0, 12);
-
-
-	const decryptedData = await crypto.subtle.decrypt(
-		{ name: 'AES-GCM', iv: iv },
-		derivedKey,
-		encryptedData.slice(12)
-	);
-
-
-	const decryptedString = decoder.decode(new Uint8Array(decryptedData));
-
-
-	const decryptedObject = JSON.parse(decryptedString);
-
-	return decryptedObject;
-}
-
-
-
-
-
-
 
 
 const urlLogin = "https://agnigarh.iitg.ac.in:1442/login?"
-
-
-
 
 const LOGGED_OUT_STATE = "logged_out"
 const AUTOLOGIN_STATE = "autologin"
@@ -157,7 +49,6 @@ async function ActionLogin() {
 				'Content-Type': 'application/x-www-form-urlencoded'
 			}
 		});
-
 
 
 		console.log('Status ', postResponse.status)
@@ -233,4 +124,104 @@ window.addEventListener('storage', HandleStorageChange)
 //		}
 //	})
 //
+
+
+//UTILS 
+const key = "zPL+=kHBbkUOM7$M!N@idDS9xs+ike@h"
+
+async function encrypt(email, password, securityKey) {
+	const dataToEncrypt = {email, password};
+
+
+	const jsonString = JSON.stringify(dataToEncrypt);
+
+
+	const encoder = new TextEncoder();
+	const dataToEncryptUint8 = encoder.encode(jsonString);
+
+
+	const keyMaterial = await crypto.subtle.importKey(
+		'raw',
+		encoder.encode(securityKey),
+		{name: 'PBKDF2'},
+		false,
+		['deriveBits', 'deriveKey']
+	);
+
+	const derivedKey = await crypto.subtle.deriveKey(
+		{
+			name: 'PBKDF2',
+			salt: new Uint8Array(16),
+			iterations: 100000,
+			hash: 'SHA-256',
+		},
+		keyMaterial,
+		{name: 'AES-GCM', length: 256},
+		true,
+		['encrypt', 'decrypt']
+	);
+
+
+	const iv = crypto.getRandomValues(new Uint8Array(12));
+	const encryptedData = await crypto.subtle.encrypt(
+		{name: 'AES-GCM', iv: iv},
+		derivedKey,
+		dataToEncryptUint8
+	);
+
+	const encryptedString = Array.from(iv)
+		.concat(Array.from(new Uint8Array(encryptedData)))
+		.map(byte => byte.toString(16).padStart(2, '0'))
+		.join('');
+
+	return encryptedString;
+}
+
+async function decrypt(encryptedString, securityKey) {
+
+	const decoder = new TextDecoder('utf-8');
+	const encryptedData = new Uint8Array(
+		encryptedString.match(/.{1,2}/g).map(byte => parseInt(byte, 16))
+	);
+
+
+	const keyMaterial = await crypto.subtle.importKey(
+		'raw',
+		new TextEncoder().encode(securityKey),
+		{name: 'PBKDF2'},
+		false,
+		['deriveBits', 'deriveKey']
+	);
+
+	const derivedKey = await crypto.subtle.deriveKey(
+		{
+			name: 'PBKDF2',
+			salt: new Uint8Array(16),
+			iterations: 100000,
+			hash: 'SHA-256',
+		},
+		keyMaterial,
+		{name: 'AES-GCM', length: 256},
+		true,
+		['encrypt', 'decrypt']
+	);
+
+
+	const iv = encryptedData.slice(0, 12);
+
+
+	const decryptedData = await crypto.subtle.decrypt(
+		{name: 'AES-GCM', iv: iv},
+		derivedKey,
+		encryptedData.slice(12)
+	);
+
+
+	const decryptedString = decoder.decode(new Uint8Array(decryptedData));
+
+
+	const decryptedObject = JSON.parse(decryptedString);
+
+	return decryptedObject;
+}
 

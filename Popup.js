@@ -54,6 +54,7 @@ btnLogout.onclick = async () => {
 	localStorage['state'] = LOGGED_OUT_STATE
 	state = LOGGED_OUT_STATE
 	applyState()
+	chrome.action.setIcon('Icons/icon_logged_out.png')
 }
 
 btnEnableAutologin.onclick = async () => {
