@@ -1,35 +1,35 @@
 <!doctype html>
 <html>
-    <head>
-    <meta charset="UTF-8">
-    <title>Auto Login options</title>
-    <link rel="stylesheet" type="text/css" href="PopupStyle.css">
-    </head>
-    <body>
-        
-    <div id="popup">
-        <div id="no-creds-state" class="hide">    
-            <h1 class="header-text">IITG AUTO LOGIN</h1>
-            <div class="content">    
-                <p>To auto login, please provide your credentials by clicking the button below.</p>
-                <button id="set-creds-btn">Give Credentials</button>
-            </div>
-        </div>
-        
-        <div id="creds-available-state" class="hide">    
-            <h1 class="header-text">IITG AUTO LOGIN</h1>
-            <div id="autologin-state" class="hide">
-                <h2>Autologin Active</h2>
-                <button id="logout-btn">Logout</button>
-            </div>
-            <div id="logged-out-state" class="hide">
-                    <button id="enable-autologin-btn">Enable Autologin</button>
-            </div>
-            <button id="change-creds-btn" class="btn-text">Change Creadentials</button>
-            
-        </div>
-    </div>
-    
-    <script type="module" src="Popup.js"></script>
-    </body>
+<head>
+	<meta charset="UTF-8">
+	<title>Auto Login options</title>
+	<link rel="stylesheet" type="text/css" href="PopupStyle.css">
+</head>
+<body>
+
+<div id="popup">
+	<div id="no-creds-state" class="hide">
+		<h1 class="header-text">IITG AUTO LOGIN</h1>
+		<div class="content">
+			<p>To auto login, please provide your credentials by clicking the button below.</p>
+			<button id="set-creds-btn">Give Credentials</button>
+		</div>
+	</div>
+
+	<div id="creds-available-state" class="hide">
+		<h1 class="header-text">IITG AUTO LOGIN</h1>
+		<div id="autologin-state" class="hide">
+			<h2 id="txt-status">Autologin Active</h2>
+			<button id="logout-btn">Logout</button>
+		</div>
+		<div id="logged-out-state" class="hide">
+			<button id="enable-autologin-btn">Enable Autologin</button>
+		</div>
+		<button id="change-creds-btn" class="btn-text">Change Creadentials</button>
+
+	</div>
+</div>
+
+<script type="module" src="Popup.js"></script>
+</body>
 </html>

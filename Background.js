@@ -4,7 +4,32 @@
  It also observes for the changes in state, changes Autologin on off accordingly
  */
 
-console.log('Hi, service worker started')
+//Keep this listener at the top only :https://developer.chrome.com/docs/extensions/develop/concepts/service-workers/events
+chrome.storage.onChanged.addListener((changes, namespace) => {
+	if ('data' in changes || 'state' in changes)
+		GetData('state').then((data) => {
+			if (data == AUTOLOGIN_STATE) StartAutologin()
+			if (data == LOGGED_OUT_STATE) EndAutoLogin()
+		})
+});
+
+async function createOffscreen() {
+	await chrome.offscreen.createDocument({
+		url: 'offscreen.html',
+		reasons: ['BLOBS'],
+		justification: 'Needs for refreshing and checking network',
+	}).catch(() => {
+	});
+}
+
+chrome.runtime.onStartup.addListener(createOffscreen);
+self.onmessage = e => {
+	logger('Hi message received', e)
+}; // keepAlive
+createOffscreen();
+
+
+logger('Hi, service worker started')
 
 
 const urlLogin = "https://agnigarh.iitg.ac.in:1442/login?"
@@ -21,7 +46,7 @@ async function ActionLogin() {
 		const encryptedData = await GetData('data');
 
 		if (!encryptedData) {
-			console.log("User cred not found");
+			logger("User cred not found");
 			return;
 		}
 
@@ -30,7 +55,7 @@ async function ActionLogin() {
 		let userName = decryptedData.email;
 		let password = decryptedData.password;
 
-		// console.log({userName, password});
+		// logger({userName, password});
 
 		const response = await fetch(urlLogin);
 		const html = await response.text();
@@ -38,7 +63,7 @@ async function ActionLogin() {
 //		let doc = parser.parseFromString(html, 'text/html');
 //		let magic_input_value = doc.querySelector('input[name="magic"]').value;
 		const magic_input_value = html.match(/(?<=name="magic" value=")[a-zA-Z\d]+/gm)[0]
-		console.log('magic :', magic_input_value);
+		logger('magic :', magic_input_value);
 
 		const params = new URLSearchParams();
 		params.append('magic', magic_input_value);
@@ -55,61 +80,32 @@ async function ActionLogin() {
 		});
 
 
-		console.log('Status ', postResponse.status)
+		logger('Status ', postResponse.status)
 		const postData = await postResponse.text();
-		console.log(postData);
+		logger(postData);
+		if (postData.includes('Firewall authentication failed')) {
+			logger('Wrong Credentials')
+			chrome.storage.local.set({status: 10, status_text: 'Wrong Credentials'})
+			EndAutoLogin()
+		} else {
+			chrome.storage.local.set({status: 9, status_text: 'Auto Login Active'})
+		}
 		//get keepalive
-		sessionCode = postData.match(/(?<=keepalive\?)[a-zA-Z\d]+/gm)[0];
-		if (sessionCode == undefined) throw 'NoKeepAliveValueFound'
-		console.log('KeepAlive Value', sessionCode);
+//		sessionCode = postData.match(/(?<=keepalive\?)[a-zA-Z\d]+/gm)[0];
+//		if (sessionCode == undefined) throw 'NoKeepAliveValueFound'
+//		logger('KeepAlive Value', sessionCode);
 //		localStorage['session-code'] = keepAliveValue
-		chrome.storage.local.set({'session-code': sessionCode})
+//		chrome.storage.local.set({'session-code': sessionCode})
 		chrome.action.setIcon({path: 'Icons/icon_active2.png'})
 
 	} catch (error) {
-		console.log(`Error: ${error}`)
-		if (error == 'NoKeepAliveValueFound') {
-			console.log('May be wrong credentials')
-		}
+		logger(`Error: ${error}`)
+//		if (error == 'NoKeepAliveValueFound') {
+//			logger('May be wrong credentials')
+//		}
 		chrome.action.setIcon({path: 'Icons/icon_logged_out.png'})
 
 	}
-}
-
-
-let intervalId = null;
-let networkIssueDetectorId = null
-
-function StartAutologin() {
-	EndAutoLogin()
-	ActionLogin().catch()
-
-	intervalId = setInterval(() => {
-		// Your code to run every 5 minutes goes here
-		ActionLogin().catch()
-		console.log('Executing every 5 minutes...');
-	}, 5 * 60 * 1000); // 5 minutes in milliseconds
-
-	networkIssueDetectorId = setInterval(
-		async function () {
-			console.log('Network Issue Detector Running')
-			try {
-				const response = await fetch('https://agnigarh.iitg.ac.in:1442/keepalive?')
-				if (response.status != 200) throw 'Status-200'
-			} catch (e) {
-				console.log('Netowrk Error ', e)
-				chrome.action.setIcon({path: 'Icons/icon_logged_out.png'})
-				ActionLogin().catch()
-			}
-
-		},
-		1000
-	)
-}
-
-function EndAutoLogin() {
-	if (intervalId) clearInterval(intervalId)
-	if (networkIssueDetectorId) clearInterval(networkIssueDetectorId)
 }
 
 
@@ -117,14 +113,6 @@ function EndAutoLogin() {
 GetData('state').then((data) => {
 	if (data == AUTOLOGIN_STATE) StartAutologin()
 })
-
-chrome.storage.onChanged.addListener((changes, namespace) => {
-	if ('data' in changes || 'state' in changes)
-		GetData('state').then((data) => {
-			if (data == AUTOLOGIN_STATE) StartAutologin()
-			if (data == LOGGED_OUT_STATE) EndAutoLogin()
-		})
-});
 
 
 //function HandleStorageChange(event) {
@@ -149,7 +137,7 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
 //			StartAutologin()
 //			password = localStorage['password']
 //			userName = localStorage['username']
-//			console.log('creds fetched are', userName, password)
+//			logger('creds fetched are', userName, password)
 //		} else {
 //			EndAutoLogin()
 //		}
@@ -262,6 +250,10 @@ async function GetData(key) {
 			resolve(res[key])
 		})
 	})
+}
+
+function logger(...text) {
+	console.log(...text)
 }
 
 

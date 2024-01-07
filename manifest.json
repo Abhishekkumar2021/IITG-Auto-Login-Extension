@@ -13,7 +13,8 @@
   "options_page": "Options.html",
   "permissions": [
     "tabs",
-    "storage"
+    "storage",
+    "offscreen"
   ],
   "host_permissions": [
     "https://agnigarh.iitg.ac.in:1442/*"

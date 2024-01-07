@@ -44,16 +44,17 @@ const btnSetCreds = document.getElementById('set-creds-btn')
 const btnChangeCreds = document.getElementById('change-creds-btn')
 const btnLogout = document.getElementById('logout-btn')
 const btnEnableAutologin = document.getElementById('enable-autologin-btn')
+const txtStatus = document.getElementById('txt-status')
+
 btnSetCreds.onclick = () => {
 	chrome.runtime.openOptionsPage();
 }
 btnChangeCreds.onclick = () => {
 	chrome.runtime.openOptionsPage();
 }
-
 btnLogout.onclick = async () => {
-	let sessionCode = await GetData('session-code')
-	await fetch(urlLogout + sessionCode, {
+//	let sessionCode = await GetData('session-code')
+	await fetch(urlLogout, {
 		mode: "no-cors"
 	})
 	chrome.action.setIcon({path: 'Icons/icon_logged_out.png'})
@@ -63,13 +64,33 @@ btnLogout.onclick = async () => {
 	state = LOGGED_OUT_STATE
 	applyState()
 }
-
 btnEnableAutologin.onclick = async () => {
 //	localStorage['state'] = AUTOLOGIN_STATE
 	chrome.storage.local.set({'state': AUTOLOGIN_STATE})
 	state = AUTOLOGIN_STATE
 	applyState()
 }
+
+GetData('status').then(async (status) => {
+	const statusText = await GetData('status_text')
+	txtStatus.innerText = statusText
+	if (status < 10) {
+		txtStatus.style.color = '#08990a'
+	} else
+		txtStatus.style.color = '#ff0000'
+
+	if (status == 10) {
+		btnLogout.style.display = 'none'
+	} else btnLogout.style.display = 'block'
+
+	if (status == 11) {
+		if (navigator.onLine) {
+			txtStatus.innerText = 'Internet Unavaibale'
+		} else {
+			txtStatus.innerText = 'You are Disconnected'
+		}
+	}
+})
 
 
 async function GetData(key) {
