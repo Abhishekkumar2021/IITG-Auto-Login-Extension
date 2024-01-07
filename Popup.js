@@ -22,7 +22,6 @@ function applyState() {
 			document.getElementById('creds-available-state').style.display = "block"
 			document.getElementById('logged-out-state').style.display = 'block'
 			document.getElementById('autologin-state').style.display = 'none'
-			chrome.action.setIcon({path: 'Icons/icon_logged_out.png'})
 			break
 		}
 		case AUTOLOGIN_STATE: {
@@ -30,7 +29,7 @@ function applyState() {
 			document.getElementById('creds-available-state').style.display = "block"
 			document.getElementById('logged-out-state').style.display = 'none'
 			document.getElementById('autologin-state').style.display = 'block'
-			chrome.action.setIcon({path: 'Icons/icon_active2.png'})
+//			chrome.action.setIcon({path: 'Icons/icon_active2.png'})
 			break
 		}
 	}
@@ -57,6 +56,8 @@ btnLogout.onclick = async () => {
 	await fetch(urlLogout + sessionCode, {
 		mode: "no-cors"
 	})
+	chrome.action.setIcon({path: 'Icons/icon_logged_out.png'})
+
 //	localStorage['state'] = LOGGED_OUT_STATE
 	chrome.storage.local.set({'state': LOGGED_OUT_STATE})
 	state = LOGGED_OUT_STATE

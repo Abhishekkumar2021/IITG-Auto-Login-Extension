@@ -13,6 +13,8 @@ const LOGGED_OUT_STATE = "logged_out"
 const AUTOLOGIN_STATE = "autologin"
 const NO_CREDS_STATE = "no_creads_state"
 
+let sessionCode = undefined
+
 async function ActionLogin() {
 	try {
 
@@ -57,11 +59,11 @@ async function ActionLogin() {
 		const postData = await postResponse.text();
 		console.log(postData);
 		//get keepalive
-		const keepAliveValue = postData.match(/(?<=keepalive\?)[a-zA-Z\d]+/gm)[0];
-		if (keepAliveValue == undefined) throw 'NoKeepAliveValueFound'
-		console.log('KeepAlive Value', keepAliveValue);
+		sessionCode = postData.match(/(?<=keepalive\?)[a-zA-Z\d]+/gm)[0];
+		if (sessionCode == undefined) throw 'NoKeepAliveValueFound'
+		console.log('KeepAlive Value', sessionCode);
 //		localStorage['session-code'] = keepAliveValue
-		chrome.storage.local.set({'session-code': keepAliveValue})
+		chrome.storage.local.set({'session-code': sessionCode})
 		chrome.action.setIcon({path: 'Icons/icon_active2.png'})
 
 	} catch (error) {
@@ -69,32 +71,45 @@ async function ActionLogin() {
 		if (error == 'NoKeepAliveValueFound') {
 			console.log('May be wrong credentials')
 		}
+		chrome.action.setIcon({path: 'Icons/icon_logged_out.png'})
 
 	}
 }
 
-console.log('Hello, running in background')
 
 let intervalId = null;
+let networkIssueDetectorId = null
 
 function StartAutologin() {
-	if (intervalId) EndAutoLogin()
-	ActionLogin().then().catch()
+	EndAutoLogin()
+	ActionLogin().catch()
+
 	intervalId = setInterval(() => {
 		// Your code to run every 5 minutes goes here
-		ActionLogin().then().catch()
+		ActionLogin().catch()
 		console.log('Executing every 5 minutes...');
 	}, 5 * 60 * 1000); // 5 minutes in milliseconds
+
+	networkIssueDetectorId = setInterval(
+		async function () {
+			console.log('Network Issue Detector Running')
+			try {
+				const response = await fetch('https://agnigarh.iitg.ac.in:1442/keepalive?')
+				if (response.status != 200) throw 'Status-200'
+			} catch (e) {
+				console.log('Netowrk Error ', e)
+				chrome.action.setIcon({path: 'Icons/icon_logged_out.png'})
+				ActionLogin().catch()
+			}
+
+		},
+		1000
+	)
 }
 
 function EndAutoLogin() {
-	if (intervalId) {
-		console.log('Interval deactivated');
-		clearInterval(intervalId);
-		intervalId = null;
-	} else {
-		console.log('Interval is not active');
-	}
+	if (intervalId) clearInterval(intervalId)
+	if (networkIssueDetectorId) clearInterval(networkIssueDetectorId)
 }
 
 
@@ -107,8 +122,10 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
 	if ('data' in changes || 'state' in changes)
 		GetData('state').then((data) => {
 			if (data == AUTOLOGIN_STATE) StartAutologin()
+			if (data == LOGGED_OUT_STATE) EndAutoLogin()
 		})
 });
+
 
 //function HandleStorageChange(event) {
 //	if (localStorage['state'] == AUTOLOGIN_STATE) {
