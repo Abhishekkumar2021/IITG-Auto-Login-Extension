@@ -1,3 +1,6 @@
+const key = "zPL+=kHBbkUOM7$M!N@idDS9xs+ike@h"
+
+
 async function save_options() {
 	const user = document.getElementById("username");
 	const pass = document.getElementById("password");
@@ -5,31 +8,34 @@ async function save_options() {
 
 	const encryptedData = await encrypt(user.value, pass.value, key);
 
-	localStorage['data'] = encryptedData
-	// localStorage['password'] = pass.value
+	chrome.storage.local.set({'data': encryptedData})
+//	localStorage['data'] = encryptedData
 	document.getElementById('saveBtn').innerText = 'Update'
-	localStorage['state'] = 'autologin'
+//	localStorage['state'] = 'autologin'
+	chrome.storage.local.set({'state': 'autologin'})
+
 }
 
 // Restores select box state to saved value from localStorage.
 async function restore_options() {
 	try {
 
-		const encryptedData = localStorage["data"];
+		const encryptedData = await GetData('data')
+		console.log('the encripyted Dat is ', encryptedData)
 
-		if (!encryptedData) {
-			return;
-		}
+//		if (!encryptedData) {
+//			return;
+//		}
 
-		const decryptedData = await decrypt(encryptedData, securityKey);
+		const decryptedData = await decrypt(encryptedData, key);
 
 		let user = decryptedData.email;
 		let pass = decryptedData.password;
 
+		console.log('Creds found', user, pass)
 		if (!user || !pass) {
 			return;
 		}
-		console.log('Creds found', user, pass)
 		document.getElementById('username').value = user
 		document.getElementById('password').value = pass
 		document.getElementById("saveBtn").innerText = "Update"
@@ -43,7 +49,6 @@ document.getElementById('saveBtn').addEventListener('click', save_options);
 
 
 //UTILS
-const key = "zPL+=kHBbkUOM7$M!N@idDS9xs+ike@h"
 
 async function encrypt(email, password, securityKey) {
 	const dataToEncrypt = {email, password};
@@ -140,6 +145,13 @@ async function decrypt(encryptedString, securityKey) {
 
 	return decryptedObject;
 }
+
+const GetData = (key) => new Promise((resolve, reject) => {
+	chrome.storage.local.get([key], (res) => {
+		console.log('the data is ', res[key])
+		resolve(res[key])
+	})
+})
 
 
 

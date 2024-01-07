@@ -1,21 +1,22 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "Auto login",
   "description": "IITG Login ext.",
   "version": "1.0",
   "background": {
-    "scripts": [
-      "background.js"
-    ]
+    "service_worker": "background.js",
+    "type": "module"
   },
-  "browser_action": {
+  "action": {
     "default_popup": "Popup.html"
   },
   "options_page": "Options.html",
   "permissions": [
     "tabs",
-    "storage",
-    "https://agnigarh.iitg.ac.in:1442/"
+    "storage"
+  ],
+  "host_permissions": [
+    "https://agnigarh.iitg.ac.in:1442/*"
   ],
   "icons": {
     "128": "Icons/icon_active2.png"

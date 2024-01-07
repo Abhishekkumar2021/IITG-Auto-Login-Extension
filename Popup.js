@@ -1,13 +1,11 @@
 const LOGGED_OUT_STATE = "logged_out"
 const AUTOLOGIN_STATE = "autologin"
 const NO_CREDS_STATE = "no_creads_state"
-let state = localStorage['state'] != undefined ? localStorage['state'] : NO_CREDS_STATE;
+let state = null
 
 
 const urlLogout = "https://agnigarh.iitg.ac.in:1442/logout?"
 
-
-console.log('The state is ', state)
 
 function applyState() {
 	switch (state) {
@@ -35,7 +33,11 @@ function applyState() {
 	}
 }
 
-applyState()
+GetData('state').then((res) => {
+	if (!res) return
+	state = res;
+	applyState()
+})
 
 const btnSetCreds = document.getElementById('set-creds-btn')
 const btnChangeCreds = document.getElementById('change-creds-btn')
@@ -49,17 +51,30 @@ btnChangeCreds.onclick = () => {
 }
 
 btnLogout.onclick = async () => {
-	let sessionCode = localStorage['session-code']
-	await fetch(urlLogout + sessionCode)
-	localStorage['state'] = LOGGED_OUT_STATE
+	let sessionCode = await GetData('session-code')
+	await fetch(urlLogout + sessionCode, {
+		mode: "no-cors"
+	})
+	chrome.action.setIcon({path: 'Icons/icon_logged_out.png'})
+//	localStorage['state'] = LOGGED_OUT_STATE
+	chrome.storage.local.set({'state': LOGGED_OUT_STATE})
 	state = LOGGED_OUT_STATE
 	applyState()
-	chrome.action.setIcon('Icons/icon_logged_out.png')
 }
 
 btnEnableAutologin.onclick = async () => {
-	localStorage['state'] = AUTOLOGIN_STATE
+//	localStorage['state'] = AUTOLOGIN_STATE
+	chrome.storage.local.set({'state': AUTOLOGIN_STATE})
 	state = AUTOLOGIN_STATE
 	applyState()
 }
 
+
+async function GetData(key) {
+	return new Promise((resolve, reject) => {
+		chrome.storage.local.get([key], (res) => {
+			console.log('the data is ', res[key])
+			resolve(res[key])
+		})
+	})
+}

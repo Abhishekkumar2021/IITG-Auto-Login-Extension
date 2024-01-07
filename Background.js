@@ -4,6 +4,7 @@
  It also observes for the changes in state, changes Autologin on off accordingly
  */
 
+console.log('Hi, service worker started')
 
 
 const urlLogin = "https://agnigarh.iitg.ac.in:1442/login?"
@@ -15,7 +16,7 @@ const NO_CREDS_STATE = "no_creads_state"
 async function ActionLogin() {
 	try {
 
-		const encryptedData = localStorage["data"];
+		const encryptedData = await GetData('data');
 
 		if (!encryptedData) {
 			console.log("User cred not found");
@@ -31,9 +32,10 @@ async function ActionLogin() {
 
 		const response = await fetch(urlLogin);
 		const html = await response.text();
-		let parser = new DOMParser();
-		let doc = parser.parseFromString(html, 'text/html');
-		let magic_input_value = doc.querySelector('input[name="magic"]').value;
+//		let parser = new DOMParser();
+//		let doc = parser.parseFromString(html, 'text/html');
+//		let magic_input_value = doc.querySelector('input[name="magic"]').value;
+		const magic_input_value = html.match(/(?<=name="magic" value=")[a-zA-Z\d]+/gm)[0]
 		console.log('magic :', magic_input_value);
 
 		const params = new URLSearchParams();
@@ -58,10 +60,12 @@ async function ActionLogin() {
 		const keepAliveValue = postData.match(/(?<=keepalive\?)[a-zA-Z\d]+/gm)[0];
 		if (keepAliveValue == undefined) throw 'NoKeepAliveValueFound'
 		console.log('KeepAlive Value', keepAliveValue);
-		localStorage['session-code'] = keepAliveValue
+//		localStorage['session-code'] = keepAliveValue
+		chrome.storage.local.set({'session-code': keepAliveValue})
+		chrome.action.setIcon({path: 'Icons/icon_active2.png'})
 
 	} catch (error) {
-		console.error(`Error: ${error}`)
+		console.log(`Error: ${error}`)
 		if (error == 'NoKeepAliveValueFound') {
 			console.log('May be wrong credentials')
 		}
@@ -94,15 +98,25 @@ function EndAutoLogin() {
 }
 
 
-if (localStorage['state'] == AUTOLOGIN_STATE) StartAutologin()
+//if (localStorage['state'] == AUTOLOGIN_STATE) StartAutologin()
+GetData('state').then((data) => {
+	if (data == AUTOLOGIN_STATE) StartAutologin()
+})
 
-function HandleStorageChange(event) {
-	if (localStorage['state'] == AUTOLOGIN_STATE) {
-		StartAutologin()
-	} else EndAutoLogin()
-}
+chrome.storage.onChanged.addListener((changes, namespace) => {
+	if ('data' in changes || 'state' in changes)
+		GetData('state').then((data) => {
+			if (data == AUTOLOGIN_STATE) StartAutologin()
+		})
+});
 
-window.addEventListener('storage', HandleStorageChange)
+//function HandleStorageChange(event) {
+//	if (localStorage['state'] == AUTOLOGIN_STATE) {
+//		StartAutologin()
+//	} else EndAutoLogin()
+//}
+//
+//window.addEventListener('storage', HandleStorageChange)
 //
 //chrome.storage.onChanged
 //	.addListener((changes, namespace) => {
@@ -224,4 +238,13 @@ async function decrypt(encryptedString, securityKey) {
 
 	return decryptedObject;
 }
+
+async function GetData(key) {
+	return new Promise((resolve, reject) => {
+		chrome.storage.local.get([key], (res) => {
+			resolve(res[key])
+		})
+	})
+}
+
 
