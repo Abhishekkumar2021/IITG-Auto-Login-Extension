@@ -3,30 +3,109 @@
  if state == autologin, it starts the Autologin Interval
  It also observes for the changes in state, changes Autologin on off accordingly
  */
+const LOGGED_OUT_STATE = "logged_out"
+const AUTOLOGIN_STATE = "autologin"
+const NO_CREDS_STATE = "no_creads_state"
 
-//Keep this listener at the top only :https://developer.chrome.com/docs/extensions/develop/concepts/service-workers/events
+
 chrome.storage.onChanged.addListener((changes, namespace) => {
-	if ('data' in changes || 'state' in changes)
-		GetData('state').then((data) => {
-			if (data == AUTOLOGIN_STATE) StartAutologin()
-			if (data == LOGGED_OUT_STATE) EndAutoLogin()
-		})
+	if ('data' in changes || 'state' in changes) {
+		init()
+	}
 });
+chrome.runtime.onStartup.addListener(
+	() => {
+		logger('browser started, starting offscreen')
+		init()
+	})
+init()
 
-async function createOffscreen() {
-	await chrome.offscreen.createDocument({
-		url: 'offscreen.html',
-		reasons: ['BLOBS'],
-		justification: 'Needs for refreshing and checking network',
-	}).catch(() => {
-	});
+function init() {
+	GetData('state').then(async (data) => {
+		await setupOffscreenDocument('offscreen.html').catch((e) => {
+			logger('Error on setting offscreen ', e)
+		})
+
+		if (data == AUTOLOGIN_STATE) {
+			chrome.runtime.sendMessage({
+				target: 'offscreen',
+				action: 'start_auto_login'
+			})
+		} else if (data == LOGGED_OUT_STATE) {
+			chrome.runtime.sendMessage({
+				target: 'offscreen',
+				action: 'end_auto_login'
+			})
+		}
+		//			if (data == AUTOLOGIN_STATE) StartAutologin()
+		//			if (data == LOGGED_OUT_STATE) EndAutoLogin()
+	})
 }
 
-chrome.runtime.onStartup.addListener(createOffscreen);
+
+let creating; // A global promise to avoid concurrency issues
+async function setupOffscreenDocument(path) {
+	// Check all windows controlled by the service worker to see if one
+	// of them is the offscreen document with the given path
+	const offscreenUrl = chrome.runtime.getURL(path);
+	const existingContexts = await chrome.runtime.getContexts({
+		contextTypes: ['OFFSCREEN_DOCUMENT'],
+		documentUrls: [offscreenUrl]
+	});
+
+	if (existingContexts.length > 0) {
+		return;
+	}
+
+	// create offscreen document
+	if (creating) {
+		await creating;
+	} else {
+		creating = chrome.offscreen.createDocument({
+			url: path,
+			reasons: ['BLOBS'],
+			justification: 'Needs for refreshing and checking network',
+		});
+		await creating;
+		creating = null;
+	}
+}
+
+
+//chrome.runtime.onStartup.addListener(createOffscreen);
+
 self.onmessage = e => {
-	logger('Hi message received', e)
+	logger('Hi message received in background', e)
+	if (e.data == 'action_login') {
+		ActionLogin().catch()
+	}
+	if (e.data == 'network_error') {
+		chrome.action.setIcon({path: 'Icons/icon_logged_out.png'})
+		chrome.storage.local.set({status: 11, status_text: ''})
+	}
 }; // keepAlive
-createOffscreen();
+
+
+//setInterval(
+//	async () => {
+//		try {
+//			await setupOffscreenDocument('offscreen.html')
+//			chrome.runtime.sendMessage({
+//				type: 'play',
+//				target: 'offscreen',
+//				data: 'start_auto_login'
+//			});
+//			logger('message sent')
+//		} catch (e) {
+//			logger('Error sending message :', e)
+//		}
+//	},
+//	2000
+//)
+
+//GetData('state').then((data) => {
+//	if (data == AUTOLOGIN_STATE) StartAutologin()
+//})
 
 
 logger('Hi, service worker started')
@@ -34,11 +113,6 @@ logger('Hi, service worker started')
 
 const urlLogin = "https://agnigarh.iitg.ac.in:1442/login?"
 
-const LOGGED_OUT_STATE = "logged_out"
-const AUTOLOGIN_STATE = "autologin"
-const NO_CREDS_STATE = "no_creads_state"
-
-let sessionCode = undefined
 
 async function ActionLogin() {
 	try {
@@ -84,11 +158,15 @@ async function ActionLogin() {
 		const postData = await postResponse.text();
 		logger(postData);
 		if (postData.includes('Firewall authentication failed')) {
-			logger('Wrong Credentials')
 			chrome.storage.local.set({status: 10, status_text: 'Wrong Credentials'})
-			EndAutoLogin()
+			chrome.runtime.sendMessage({
+				target: 'offscreen',
+				action: 'end_auto_login'
+			})
+			throw 'Wrong Credentials'
 		} else {
 			chrome.storage.local.set({status: 9, status_text: 'Auto Login Active'})
+			chrome.action.setIcon({path: 'Icons/icon_active2.png'})
 		}
 		//get keepalive
 //		sessionCode = postData.match(/(?<=keepalive\?)[a-zA-Z\d]+/gm)[0];
@@ -96,7 +174,6 @@ async function ActionLogin() {
 //		logger('KeepAlive Value', sessionCode);
 //		localStorage['session-code'] = keepAliveValue
 //		chrome.storage.local.set({'session-code': sessionCode})
-		chrome.action.setIcon({path: 'Icons/icon_active2.png'})
 
 	} catch (error) {
 		logger(`Error: ${error}`)
@@ -110,9 +187,6 @@ async function ActionLogin() {
 
 
 //if (localStorage['state'] == AUTOLOGIN_STATE) StartAutologin()
-GetData('state').then((data) => {
-	if (data == AUTOLOGIN_STATE) StartAutologin()
-})
 
 
 //function HandleStorageChange(event) {

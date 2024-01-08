@@ -73,6 +73,7 @@ btnEnableAutologin.onclick = async () => {
 
 GetData('status').then(async (status) => {
 	const statusText = await GetData('status_text')
+	logger('The status is ', status)
 	txtStatus.innerText = statusText
 	if (status < 10) {
 		txtStatus.style.color = '#08990a'
@@ -100,4 +101,8 @@ async function GetData(key) {
 			resolve(res[key])
 		})
 	})
+}
+
+function logger(...text) {
+	console.log(...text)
 }

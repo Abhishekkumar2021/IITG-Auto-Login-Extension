@@ -1,6 +1,31 @@
-setInterval(async () => {
-	(await navigator.serviceWorker.ready).active.postMessage('keepAlive');
-}, 20000);
+const LOGGED_OUT_STATE = "logged_out"
+const AUTOLOGIN_STATE = "autologin"
+const NO_CREDS_STATE = "no_creads_state"
+
+logger('Offscreen doc started')
+
+
+chrome.runtime.onMessage.addListener((message) => {
+
+	if (message.target != 'offscreen') return
+	console.log('Message received on offscreen', message);
+	switch (message.action) {
+		case 'start_auto_login': {
+			StartAutologin()
+			break;
+		}
+		case 'end_auto_login': {
+			EndAutoLogin()
+		}
+	}
+});
+
+//(await navigator.serviceWorker.ready).active.postMessage('actiosdn_login');
+
+async function SendMessage(message) {
+	(await navigator.serviceWorker.ready).active.postMessage(message);
+
+}
 
 
 let intervalId = null;
@@ -8,11 +33,12 @@ let networkIssueDetectorId = null
 
 function StartAutologin() {
 	EndAutoLogin()
-	ActionLogin().catch()
+	logger('Auto Login Start')
+	SendMessage('action_login').catch()
 
 	intervalId = setInterval(() => {
 		// Your code to run every 5 minutes goes here
-		ActionLogin().catch()
+		SendMessage('action_login').catch()
 		logger('Executing every 5 minutes...');
 	}, 5 * 60 * 1000); // 5 minutes in milliseconds
 
@@ -24,9 +50,8 @@ function StartAutologin() {
 				if (response.status != 200) throw 'Status-200'
 			} catch (e) {
 				logger('Netowrk Error ', e)
-				chrome.action.setIcon({path: 'Icons/icon_logged_out.png'})
-				chrome.storage.local.set({status: 11, status_text: ''})
-				ActionLogin().catch()
+				SendMessage('network_error').catch()
+				SendMessage('action_login').catch()
 			}
 
 		},
@@ -35,18 +60,11 @@ function StartAutologin() {
 }
 
 function EndAutoLogin() {
+	logger('Auto Login Off')
 	if (intervalId) clearInterval(intervalId)
 	if (networkIssueDetectorId) clearInterval(networkIssueDetectorId)
 }
 
-
-async function GetData(key) {
-	return new Promise((resolve, reject) => {
-		chrome.storage.local.get([key], (res) => {
-			resolve(res[key])
-		})
-	})
-}
 
 function logger(...text) {
 	console.log(...text)
