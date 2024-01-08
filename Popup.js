@@ -86,7 +86,7 @@ GetData('status').then(async (status) => {
 
 	if (status == 11) {
 		if (navigator.onLine) {
-			txtStatus.innerText = 'Internet Unavaibale'
+			txtStatus.innerText = 'Internet Unavailable'
 		} else {
 			txtStatus.innerText = 'You are Disconnected'
 		}

@@ -18,6 +18,11 @@ chrome.runtime.onStartup.addListener(
 		logger('browser started, starting offscreen')
 		init()
 	})
+chrome.runtime.onInstalled.addListener(
+	() => {
+		chrome.runtime.openOptionsPage()
+	}
+)
 init()
 
 function init() {
@@ -28,12 +33,12 @@ function init() {
 
 		if (data == AUTOLOGIN_STATE) {
 			chrome.runtime.sendMessage({
-				target: 'offscreen',
+				title: 'login_actions',
 				action: 'start_auto_login'
 			})
 		} else if (data == LOGGED_OUT_STATE) {
 			chrome.runtime.sendMessage({
-				target: 'offscreen',
+				title: 'login_actions',
 				action: 'end_auto_login'
 			})
 		}
@@ -71,41 +76,21 @@ async function setupOffscreenDocument(path) {
 	}
 }
 
-
-//chrome.runtime.onStartup.addListener(createOffscreen);
-
 self.onmessage = e => {
 	logger('Hi message received in background', e)
-	if (e.data == 'action_login') {
+	if (e.data.title == 'action_login') {
 		ActionLogin().catch()
 	}
-	if (e.data == 'network_error') {
-		chrome.action.setIcon({path: 'Icons/icon_logged_out.png'})
+	if (e.data.title == 'network_error') {
+		UpdateIcon('Icons/icon_logged_out.png')
+//		chrome.action.setIcon({path: 'Icons/icon_logged_out.png'})
 		chrome.storage.local.set({status: 11, status_text: ''})
+		ActionLogin().catch()
 	}
-}; // keepAlive
-
-
-//setInterval(
-//	async () => {
-//		try {
-//			await setupOffscreenDocument('offscreen.html')
-//			chrome.runtime.sendMessage({
-//				type: 'play',
-//				target: 'offscreen',
-//				data: 'start_auto_login'
-//			});
-//			logger('message sent')
-//		} catch (e) {
-//			logger('Error sending message :', e)
-//		}
-//	},
-//	2000
-//)
-
-//GetData('state').then((data) => {
-//	if (data == AUTOLOGIN_STATE) StartAutologin()
-//})
+	if (e.data.title == 'icon_update') {
+		UpdateIcon(e.data.path)
+	}
+};
 
 
 logger('Hi, service worker started')
@@ -115,108 +100,81 @@ const urlLogin = "https://agnigarh.iitg.ac.in:1442/login?"
 
 
 async function ActionLogin() {
-	try {
+	return new Promise(async (resolve, reject) => {
 
-		const encryptedData = await GetData('data');
+		try {
 
-		if (!encryptedData) {
-			logger("User cred not found");
-			return;
-		}
+			const encryptedData = await GetData('data');
 
-		const decryptedData = await decrypt(encryptedData, key);
-
-		let userName = decryptedData.email;
-		let password = decryptedData.password;
-
-		// logger({userName, password});
-
-		const response = await fetch(urlLogin);
-		const html = await response.text();
-//		let parser = new DOMParser();
-//		let doc = parser.parseFromString(html, 'text/html');
-//		let magic_input_value = doc.querySelector('input[name="magic"]').value;
-		const magic_input_value = html.match(/(?<=name="magic" value=")[a-zA-Z\d]+/gm)[0]
-		logger('magic :', magic_input_value);
-
-		const params = new URLSearchParams();
-		params.append('magic', magic_input_value);
-		params.append('4Tredir', "https://agnigarh.iitg.ac.in:1442/login?")
-		params.append('username', userName)
-		params.append('password', password)
-
-		const postResponse = await fetch(urlLogin, {
-			method: 'POST',
-			body: params,
-			headers: {
-				'Content-Type': 'application/x-www-form-urlencoded'
+			if (!encryptedData) {
+				logger("User cred not found");
+				return;
 			}
-		});
+
+			const decryptedData = await decrypt(encryptedData, key);
+
+			let userName = decryptedData.email;
+			let password = decryptedData.password;
+
+			// logger({userName, password});
+
+			const response = await fetch(urlLogin);
+			const html = await response.text();
+			//		let parser = new DOMParser();
+			//		let doc = parser.parseFromString(html, 'text/html');
+			//		let magic_input_value = doc.querySelector('input[name="magic"]').value;
+			const magic_input_value = html.match(/(?<=name="magic" value=")[a-zA-Z\d]+/gm)[0]
+			logger('magic :', magic_input_value);
+
+			const params = new URLSearchParams();
+			params.append('magic', magic_input_value);
+			params.append('4Tredir', "https://agnigarh.iitg.ac.in:1442/login?")
+			params.append('username', userName)
+			params.append('password', password)
+
+			const postResponse = await fetch(urlLogin, {
+				method: 'POST',
+				body: params,
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded'
+				}
+			});
 
 
-		logger('Status ', postResponse.status)
-		const postData = await postResponse.text();
-		logger(postData);
-		if (postData.includes('Firewall authentication failed')) {
-			chrome.storage.local.set({status: 10, status_text: 'Wrong Credentials'})
-			chrome.runtime.sendMessage({
-				target: 'offscreen',
-				action: 'end_auto_login'
-			})
-			throw 'Wrong Credentials'
-		} else {
-			chrome.storage.local.set({status: 9, status_text: 'Auto Login Active'})
-			chrome.action.setIcon({path: 'Icons/icon_active2.png'})
+			logger('Status ', postResponse.status)
+			const postData = await postResponse.text();
+			logger(postData);
+			if (postData.includes('Firewall authentication failed')) {
+				chrome.storage.local.set({status: 10, status_text: 'Wrong Credentials'})
+				chrome.runtime.sendMessage({
+					title: 'login_actions',
+					action: 'end_auto_login'
+				})
+				throw 'Wrong Credentials'
+			} else {
+				chrome.storage.local.set({status: 9, status_text: 'Auto Login Active'})
+//				chrome.action.setIcon({path: 'Icons/icon_active2.png'})
+				UpdateIcon('Icons/icon_active2.png')
+			}
+			resolve()
+			//get keepalive
+			//		sessionCode = postData.match(/(?<=keepalive\?)[a-zA-Z\d]+/gm)[0];
+			//		if (sessionCode == undefined) throw 'NoKeepAliveValueFound'
+			//		logger('KeepAlive Value', sessionCode);
+			//		localStorage['session-code'] = keepAliveValue
+			//		chrome.storage.local.set({'session-code': sessionCode})
+
+		} catch (error) {
+			logger(`Error: ${error}`)
+			//		if (error == 'NoKeepAliveValueFound') {
+			//			logger('May be wrong credentials')
+			//		}
+//			chrome.action.setIcon({path: 'Icons/icon_logged_out.png'})
+			UpdateIcon('Icons/icon_logged_out.png')
+			reject()
 		}
-		//get keepalive
-//		sessionCode = postData.match(/(?<=keepalive\?)[a-zA-Z\d]+/gm)[0];
-//		if (sessionCode == undefined) throw 'NoKeepAliveValueFound'
-//		logger('KeepAlive Value', sessionCode);
-//		localStorage['session-code'] = keepAliveValue
-//		chrome.storage.local.set({'session-code': sessionCode})
-
-	} catch (error) {
-		logger(`Error: ${error}`)
-//		if (error == 'NoKeepAliveValueFound') {
-//			logger('May be wrong credentials')
-//		}
-		chrome.action.setIcon({path: 'Icons/icon_logged_out.png'})
-
-	}
+	})
 }
-
-
-//if (localStorage['state'] == AUTOLOGIN_STATE) StartAutologin()
-
-
-//function HandleStorageChange(event) {
-//	if (localStorage['state'] == AUTOLOGIN_STATE) {
-//		StartAutologin()
-//	} else EndAutoLogin()
-//}
-//
-//window.addEventListener('storage', HandleStorageChange)
-//
-//chrome.storage.onChanged
-//	.addListener((changes, namespace) => {
-//		let autoLoginEnabled = false
-//		for (let key in changes) {
-//			let storageChange = changes[key]
-//			if (key == 'state' && storageChange.newValue == AUTOLOGIN_STATE) {
-//				autoLoginEnabled = true
-//				break
-//			}
-//		}
-//		if (autoLoginEnabled) {
-//			StartAutologin()
-//			password = localStorage['password']
-//			userName = localStorage['username']
-//			logger('creds fetched are', userName, password)
-//		} else {
-//			EndAutoLogin()
-//		}
-//	})
-//
 
 
 //UTILS 
@@ -322,6 +280,15 @@ async function GetData(key) {
 	return new Promise((resolve, reject) => {
 		chrome.storage.local.get([key], (res) => {
 			resolve(res[key])
+		})
+	})
+}
+
+function UpdateIcon(iconPath) {
+	chrome.action.setIcon({path: iconPath}, () => {
+		chrome.runtime.sendMessage({
+			title: 'icon_update',
+			path: iconPath
 		})
 	})
 }
