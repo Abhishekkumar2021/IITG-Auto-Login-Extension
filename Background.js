@@ -23,6 +23,13 @@ chrome.runtime.onInstalled.addListener(
 		chrome.runtime.openOptionsPage()
 	}
 )
+chrome.runtime.onMessage.addListener(
+	(message) => {
+		if (message.title == 'refresh') {
+			ActionLogin().catch()
+		}
+	}
+)
 init()
 
 function init() {

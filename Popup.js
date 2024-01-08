@@ -44,6 +44,7 @@ const btnSetCreds = document.getElementById('set-creds-btn')
 const btnChangeCreds = document.getElementById('change-creds-btn')
 const btnLogout = document.getElementById('logout-btn')
 const btnEnableAutologin = document.getElementById('enable-autologin-btn')
+const btnRefresh = document.getElementById('btn-refresh')
 const txtStatus = document.getElementById('txt-status')
 
 btnSetCreds.onclick = () => {
@@ -69,6 +70,11 @@ btnEnableAutologin.onclick = async () => {
 	chrome.storage.local.set({'state': AUTOLOGIN_STATE})
 	state = AUTOLOGIN_STATE
 	applyState()
+}
+btnRefresh.onclick = () => {
+	chrome.runtime.sendMessage({
+		title: 'refresh'
+	})
 }
 
 GetData('status').then(async (status) => {
