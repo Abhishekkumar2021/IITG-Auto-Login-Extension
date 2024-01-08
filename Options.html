@@ -1,20 +1,26 @@
 ﻿<!doctype html>
 <html>
-    <head>
-    <meta charset="UTF-8">
-    <title>Auto Login options</title>
-    <link rel="stylesheet" type="text/css" href="OptionsStyle.css">
-    </head>
-    <body>
-    <h1>IIT GUWAHATI AUTOLOGIN</h1>
-    <div class="input-group">
-        <label for="username">USERNAME:</label>
-        <input type="text" id="username" name="username">
-        <label for="password">PASSWORD:</label>
-        <input type="password" id="password" name="password">
-        <button id="saveBtn">Save</button>
-    </div>
-    
-    <script type="module" src="Options.js"></script>
-    </body>
+<head>
+	<meta charset="UTF-8">
+	<title>Auto Login options</title>
+	<link rel="stylesheet" type="text/css" href="OptionsStyle.css">
+</head>
+<body>
+<div id="box">
+	<h1>IIT GUWAHATI AUTOLOGIN</h1>
+	<img id="icon" src="Icons/icon_active2.png"/>
+	<div class="input-group">
+		<label for="username">Username:</label>
+		<input type="text" id="username" name="username">
+		<label for="password">Password:</label>
+		<input type="password" id="password" name="password">
+		<p id='status'>Credentials Added Successfully</p>
+		<button id="saveBtn">Save</button>
+	</div>
+	<p id="justi">Credentials are securely stored in encrypted form within the local storage</p>
+
+</div>
+
+<script type="module" src="Options.js"></script>
+</body>
 </html>

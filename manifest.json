@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "IITG AutoLogin++",
-  "description": "IITG Login extension, keeps you logged in to IITG Network, no need to keep authentication tab open.",
+  "description": "IITG Login extension. Keeps you logged in to IITG Network. No need to keep authentication tab open.",
   "version": "1.0",
   "background": {
     "service_worker": "background.js",

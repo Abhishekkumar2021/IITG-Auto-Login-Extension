@@ -1,47 +1,72 @@
 * {
-    font-family: "Agency FB";
+	font-family: "Tahoma";
 }
+
+#justi {
+	color: #545454;
+	margin-top: 2rem;
+}
+
+#status {
+	color: #08990a;
+	display: none;
+}
+
+#box {
+	background: #f0f0f0;
+	display: block;
+	width: 20rem;
+	margin: 5% auto auto;
+	padding: 2rem;
+}
+
+#icon {
+	margin: auto;
+	display: block;
+	width: 4rem;
+}
+
 .input-group {
-    width: 15rem;
-    margin: auto;
+	width: 15rem;
+	margin: auto;
+	margin-top: 4rem;
 }
 
 h1 {
-    text-align: center;
-    font-family: "Agency FB";
+	text-align: center;
 }
 
 label {
-    font-family: "Agency FB";
-    margin-top: 1rem;
-    display: block; 
+	margin-top: 1rem;
+	display: block;
+	color: #a1a1a1;
 }
 
 input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    background-color: #ffffff;
-    font-size: 14px;
-    display: block;
-    
+	width: 100%;
+	height: 2rem;
+	margin-top: 5px;
+	border: 1px solid #ddd;
+	background-color: #ffffff;
+	font-size: 14px;
+	display: block;
+
 }
 
 button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    background-color: #3498db;
-    color: #fff;  
-    font-size: 16px;
-    cursor: pointer;
-    display: block;
-    margin: auto;
-    margin-top: 2rem;
-    font-family: "Agency FB";
+	padding: 10px 20px;
+	border: none;
+	border-radius: 5px;
+	background-color: #3498db;
+	color: #fff;
+	font-size: 16px;
+	cursor: pointer;
+	display: block;
+	margin: auto;
+	margin-top: 2rem;
 }
 
 button:hover {
-    background-color: #2c8ad8;
-    color: #f2f2f2;
+	background-color: #2c8ad8;
+	color: #f2f2f2;
 }

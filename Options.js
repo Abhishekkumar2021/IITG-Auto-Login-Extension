@@ -13,6 +13,7 @@ async function save_options() {
 	document.getElementById('saveBtn').innerText = 'Update'
 //	localStorage['state'] = 'autologin'
 	chrome.storage.local.set({'state': 'autologin'})
+	document.getElementById('status').style.display = 'block'
 
 }
 
