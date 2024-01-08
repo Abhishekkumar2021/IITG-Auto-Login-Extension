@@ -76,5 +76,5 @@ function EndAutoLogin() {
 
 
 function logger(...text) {
-	console.log(...text)
+//	console.log(...text)
 }

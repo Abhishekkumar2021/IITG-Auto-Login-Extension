@@ -301,7 +301,7 @@ function UpdateIcon(iconPath) {
 }
 
 function logger(...text) {
-	console.log(...text)
+//	console.log(...text)
 }
 
 

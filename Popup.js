@@ -110,5 +110,5 @@ async function GetData(key) {
 }
 
 function logger(...text) {
-	console.log(...text)
+//	console.log(...text)
 }

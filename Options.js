@@ -22,7 +22,6 @@ async function restore_options() {
 	try {
 
 		const encryptedData = await GetData('data')
-		console.log('the encripyted Dat is ', encryptedData)
 
 //		if (!encryptedData) {
 //			return;
@@ -33,7 +32,6 @@ async function restore_options() {
 		let user = decryptedData.email;
 		let pass = decryptedData.password;
 
-		console.log('Creds found', user, pass)
 		if (!user || !pass) {
 			return;
 		}
@@ -149,7 +147,6 @@ async function decrypt(encryptedString, securityKey) {
 
 const GetData = (key) => new Promise((resolve, reject) => {
 	chrome.storage.local.get([key], (res) => {
-		console.log('the data is ', res[key])
 		resolve(res[key])
 	})
 })
