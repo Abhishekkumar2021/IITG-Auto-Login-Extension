@@ -1,63 +1,63 @@
 
 * {
-    box-sizing: border-box;
-    font-family: Tahoma;
-    font-size: 1rem;
+	box-sizing: border-box;
+	font-family: Tahoma;
+	font-size: 1rem;
 }
+
 h1 {
-    font-size: 1.7rem;
+	font-size: 1.7rem;
 }
+
 #popup {
-    width: 20rem;
-    padding: 1rem;
-    background: #f0f0f0;
+	width: 20rem;
+	padding: 1rem;
+	background: #f0f0f0;
 }
 
 .header-text {
-    
-}
-.content {
-    padding: 2rem 1rem 1rem 1rem;
-    
+
 }
 
+.content {
+	padding: 2rem 1rem 1rem 1rem;
+
+}
 
 
 button {
-    display: inline-block;
-    padding: 0.7rem 1rem;
-    margin: 1rem 0;
-    font-size: 1rem;
-    text-align: center;
-    text-decoration: none;
-    background-color: #008CBA;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition-duration: 0.4s;
+	display: inline-block;
+	padding: 0.7rem 1rem;
+	margin: 1rem 0;
+	font-size: 1rem;
+	text-align: center;
+	text-decoration: none;
+	background-color: #008CBA;
+	color: white;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	transition-duration: 0.4s;
 }
+
 button:hover {
-    background-color: #4CAF50; 
-    color: white; 
+	background-color: #4CAF50;
+	color: white;
 }
 
 
 .hide {
-    display: none;
+	display: none;
 }
 
 
 .btn-text {
-    background: none;
-    border: none;
-    padding: 0;
-    color: #0693e3;
-    text-decoration: underline;
-    cursor: pointer;
-    text-align: center;
+	padding: 0;
+	color: #0693e3;
+	text-decoration: underline;
+	cursor: pointer;
 }
 
-.btn-text:focus, .btn-text:active {
-    color: #0b4f6c;
+.btn-text:hover {
+	color: #0b4f6c;
 }
