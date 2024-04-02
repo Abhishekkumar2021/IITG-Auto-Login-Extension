@@ -1,38 +1,39 @@
 <!doctype html>
 <html>
+
 <head>
 	<meta charset="UTF-8">
 	<title>Auto Login options</title>
 	<link rel="stylesheet" type="text/css" href="PopupStyle.css">
 </head>
+
 <body>
 
-<div id="popup">
-	<div id="no-creds-state" class="hide">
-		<h1 class="header-text">IITG AUTO LOGIN</h1>
-		<div class="content">
-			<p>To auto login, please provide your credentials by clicking the button below.</p>
-			<button id="set-creds-btn">Give Credentials</button>
-		</div>
-	</div>
-
-	<div id="creds-available-state" class="hide">
-		<h1 class="header-text">IITG AUTO LOGIN</h1>
-		<div id="autologin-state" class="hide">
-			<h2 id="txt-status">Autologin Active</h2>
-			<div class='buttons'>
-				<button id="logout-btn">Logout</button>
-				<img src="Icons/icon_refresh.png" width=45 height=45 id="btn-refresh"></img>
+	<div id="popup">
+		<div id="no-creds-state" class="hide">
+			<h1 class="header-text">IITG AUTO LOGIN</h1>
+			<div class="content">
+				<p>To auto login, please provide your credentials by clicking the button below.</p>
+				<button id="set-creds-btn">Give Credentials</button>
 			</div>
 		</div>
-		<div id="logged-out-state" class="hide">
-			<button id="enable-autologin-btn">Enable Autologin</button>
+
+		<div id="creds-available-state" class="hide">
+			<div id="autologin-state" class="hide">
+				<h2 id="txt-status">You are active</h2>
+				<div class='buttons' class="hide">
+					<button id="logout-btn">Logout</button>
+					<button id="btn-refresh">Refresh</button>
+				</div>
+			</div>
+			<div id="logged-out-state" >
+				<button id="enable-autologin-btn">Enable Autologin</button>
+			</div>
+			<div id="change-creds-btn" class="btn-text">Change Credentials</div>
 		</div>
-		<div id="change-creds-btn" class="btn-text">Change Credentials</div>
-
 	</div>
-</div>
 
-<script type="module" src="Popup.js"></script>
+	<script type="module" src="Popup.js"></script>
 </body>
+
 </html>
